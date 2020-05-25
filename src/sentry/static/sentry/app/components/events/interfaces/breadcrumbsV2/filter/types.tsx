@@ -1,7 +1,7 @@
 import {BreadcrumbDetails, BreadcrumbType, BreadcrumbLevelType} from '../types';
 
 type OptionBase = {
-  symbol: React.ReactNode;
+  symbol: React.ReactElement;
   isChecked: boolean;
   isDisabled: boolean;
   description?: string;
@@ -14,9 +14,6 @@ export type OptionType = {
 
 export type OptionLevel = {
   type: BreadcrumbLevelType;
-  symbol: React.ReactNode;
-  isChecked: boolean;
-  description?: string;
 } & OptionBase;
 
 export type Option = OptionType | OptionLevel;

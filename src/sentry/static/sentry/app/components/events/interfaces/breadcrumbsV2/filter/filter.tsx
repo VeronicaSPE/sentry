@@ -7,11 +7,14 @@ import DropdownControl from 'app/components/dropdownControl';
 import {DropDownButton} from './dropdownButton';
 import {OptionsGroup} from './optionsGroup';
 import {Header} from './header';
-import {OptionType, OptionLevel} from './types';
+import {OptionType, OptionLevel, Option} from './types';
+
+type OnClick = React.ComponentProps<typeof OptionsGroup>['onClick'];
+type Options = [Array<OptionType>, Array<OptionLevel>];
 
 type Props = {
-  options: [Array<OptionType>, Array<OptionLevel>];
-  onClickOption: React.ComponentProps<typeof OptionsGroup>['onClick'];
+  options: Options;
+  onFilter: (options: Options) => void;
   onCheckAll: (checkAll: boolean) => void;
 };
 
@@ -74,8 +77,53 @@ class Filter extends React.Component<Props, State> {
     return checkedQuantity;
   };
 
+  filterByType = (options: Options, option: Option): Options => {
+    // Filter Types
+    const types = options[0].map(type => {
+      if (isEqual(type, option)) {
+        return {
+          ...type,
+          isChecked: !type.isChecked,
+        };
+      }
+      return type;
+    });
+
+    const checkedTypes = types.filter(t => t.isChecked);
+
+    // Filter levels
+    const levels = options[1].map(level => {
+      if (!checkedTypes.some(type => type.levels.includes(level.type))) {
+        return {
+          ...level,
+          isChecked: false,
+          isDisabled: true,
+        };
+      }
+      return {
+        ...level,
+        isChecked: true,
+        isDisabled: false,
+      };
+    });
+
+    return [types, levels];
+  };
+
+  handleClick = (...args: Parameters<OnClick>) => {
+    const [type, option] = args;
+    const {onFilter, options} = this.props;
+
+    if (type === 'type') {
+      const updatedOptions = this.filterByType(options, option);
+      onFilter(updatedOptions);
+    }
+
+    return;
+  };
+
   render() {
-    const {options, onClickOption} = this.props;
+    const {options} = this.props;
     const {hasTypeOption, hasLevelOption, checkedQuantity} = this.state;
 
     if (!hasTypeOption && !hasLevelOption) {
@@ -95,20 +143,18 @@ class Filter extends React.Component<Props, State> {
             />
           )}
         >
-          <React.Fragment>
-            <Header
-              onCheckAll={this.handleToggleCheckAll}
-              checkedQuantity={checkedQuantity}
-              isAllChecked={false}
-            />
-            {hasTypeOption && (
-              <OptionsGroup type="type" onClick={onClickOption} options={options[0]} />
-            )}
+          <Header
+            onCheckAll={this.handleToggleCheckAll}
+            checkedQuantity={checkedQuantity}
+            isAllChecked={false}
+          />
+          {hasTypeOption && (
+            <OptionsGroup type="type" onClick={this.handleClick} options={options[0]} />
+          )}
 
-            {hasLevelOption && (
-              <OptionsGroup type="level" onClick={onClickOption} options={options[1]} />
-            )}
-          </React.Fragment>
+          {hasLevelOption && (
+            <OptionsGroup type="level" onClick={this.handleClick} options={options[1]} />
+          )}
         </DropdownControl>
       </Wrapper>
     );

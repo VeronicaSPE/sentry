@@ -16,8 +16,14 @@ type Props = {
 };
 
 const OptionsGroup = ({type, options, onClick}: Props) => {
-  const getTitle = () => {
+  const renderTitle = () => {
     return type === 'type' ? t('Type') : t('Level');
+  };
+
+  const renderIcon = ({symbol, isDisabled}: Option) => {
+    return React.cloneElement(symbol, {
+      isDisabled,
+    });
   };
 
   const handleClick = (option: Option) => (event: React.MouseEvent<HTMLLIElement>) => {
@@ -27,15 +33,16 @@ const OptionsGroup = ({type, options, onClick}: Props) => {
 
   return (
     <div>
-      <Header>{getTitle()}</Header>
+      <Header>{renderTitle()}</Header>
       <List>
         {options.map(option => (
           <ListItem
             key={option.type}
             isChecked={option.isChecked}
             onClick={handleClick(option)}
+            isDisabled={option.isDisabled}
           >
-            {option.symbol}
+            {renderIcon(option)}
             <ListItemDescription>{option.description}</ListItemDescription>
             <CheckboxFancy isChecked={option.isChecked} isDisabled={option.isDisabled} />
           </ListItem>
@@ -65,14 +72,14 @@ const List = styled('ul')`
   padding: 0;
 `;
 
-const ListItem = styled('li')<{isChecked?: boolean}>`
+const ListItem = styled('li')<{isChecked?: boolean; isDisabled?: boolean}>`
   display: grid;
   grid-template-columns: max-content 1fr max-content;
   grid-column-gap: ${space(1)};
   align-items: center;
   padding: ${space(1)} ${space(2)};
   border-bottom: 1px solid ${p => p.theme.borderDark};
-  cursor: pointer;
+  cursor: ${p => (p.isDisabled ? 'not-allowed' : 'pointer')};
   :hover {
     background-color: ${p => p.theme.offWhite};
   }
