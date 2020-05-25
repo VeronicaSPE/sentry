@@ -10,23 +10,18 @@ type DropdownButtonProps = React.ComponentProps<typeof DropdownButton>;
 type Props = {
   isOpen: boolean;
   getActorProps: GetActorPropsFn;
+  checkedQuantity: number;
 };
 
-const DropDownButton = ({isOpen, getActorProps}: Props) => {
-  const checkedOptionsQuantity = 1;
-
+const DropDownButton = ({isOpen, getActorProps, checkedQuantity}: Props) => {
   const buttonProps = {
     label: t('Filter By'),
     priority: 'default',
     hasDarkBorderBottomColor: false,
   };
 
-  if (checkedOptionsQuantity > 0) {
-    buttonProps.label = tn(
-      '%s Active Filter',
-      '%s Active Filters',
-      checkedOptionsQuantity
-    );
+  if (checkedQuantity > 0) {
+    buttonProps.label = tn('%s Active Filter', '%s Active Filters', checkedQuantity);
     buttonProps.priority = 'primary';
     buttonProps.hasDarkBorderBottomColor = true;
   }

@@ -266,9 +266,28 @@ class BreadcrumbsContainer extends React.Component<Props, State> {
 
   handleResetFilter = () => {};
 
-  handleClickFilterCheckAll = () => {
+  handleClickFilterCheckAll = (checkAll: boolean) => {
     const {filterOptions} = this.state;
-    console.log('filterOptions', filterOptions);
+    const newFilterOptions: FilterOptions = [[], []];
+
+    for (const index in filterOptions) {
+      for (const option in filterOptions[index]) {
+        newFilterOptions[index][option] = {
+          ...filterOptions[index][option],
+          isChecked: checkAll,
+        };
+      }
+    }
+
+    this.setState(
+      prevState => ({
+        filteredByFilter: checkAll ? prevState.breadcrumbs : [],
+        filterOptions: newFilterOptions,
+      }),
+      () => {
+        this.handleFilterBySearchTerm(this.state.searchTerm);
+      }
+    );
   };
 
   handleClickFilterOption = () => {
@@ -277,12 +296,14 @@ class BreadcrumbsContainer extends React.Component<Props, State> {
 
   render() {
     const {type, event, orgId} = this.props;
-    const {filterOptions, searchTerm} = this.state;
+    const {filterOptions, searchTerm, filteredByFilter} = this.state;
 
     const {
       collapsedQuantity,
       filteredCollapsedBreadcrumbs,
     } = this.getCollapsedCrumbQuantity();
+
+    console.log('filteredByFilter', filteredByFilter);
 
     return (
       <EventDataSection

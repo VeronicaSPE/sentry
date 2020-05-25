@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from '@emotion/styled';
+import isEqual from 'lodash/isEqual';
 
 import {t} from 'app/locale';
 import DropdownControl from 'app/components/dropdownControl';
@@ -12,18 +13,55 @@ import {OptionType, OptionLevel} from './types';
 type Props = {
   options: [Array<OptionType>, Array<OptionLevel>];
   onClickOption: () => void;
-  onCheckAll: () => void;
+  onCheckAll: (checkAll: boolean) => void;
 };
 
-const Filter = ({options, onClickOption, onCheckAll}: Props) => {
-  const hasTypeOption = options[0].length > 0;
-  const hasLevelOption = options[1].length > 0;
+type State = {
+  checkAll: boolean;
+  hasTypeOption: boolean;
+  hasLevelOption: boolean;
+  checkedQuantity: number;
+};
 
-  if (!hasTypeOption && !hasLevelOption) {
-    return null;
+class Filter extends React.Component<Props, State> {
+  state: State = {
+    checkAll: true,
+    hasTypeOption: false,
+    hasLevelOption: false,
+    checkedQuantity: 0,
+  };
+
+  componentDidUpdate(prevProps: Props) {
+    if (!isEqual(prevProps.options, this.props.options)) {
+      this.updateState();
+    }
   }
 
-  const getCheckedQuantity = () => {
+  updateState = () => {
+    const {options} = this.props;
+    this.setState({
+      hasTypeOption: options[0].length > 0,
+      hasLevelOption: options[1].length > 0,
+      checkedQuantity: this.getCheckedQuantity(),
+    });
+  };
+
+  handleToggleCheckAll = () => {
+    const {onCheckAll} = this.props;
+
+    this.setState(
+      prevState => ({
+        checkAll: !prevState.checkAll,
+      }),
+      () => {
+        onCheckAll(this.state.checkAll);
+      }
+    );
+  };
+
+  getCheckedQuantity = () => {
+    const {options} = this.props;
+
     let checkedQuantity = 0;
 
     for (const index in options) {
@@ -37,33 +75,50 @@ const Filter = ({options, onClickOption, onCheckAll}: Props) => {
     return checkedQuantity;
   };
 
-  return (
-    <Wrapper>
-      <DropdownControl
-        menuWidth="240px"
-        blendWithActor
-        button={({isOpen, getActorProps}) => (
-          <DropDownButton isOpen={isOpen} getActorProps={getActorProps} />
-        )}
-      >
-        <React.Fragment>
-          <Header
-            onCheckAll={onCheckAll}
-            checkedQuantity={getCheckedQuantity()}
-            isAllChecked={false}
-          />
-          {hasTypeOption && (
-            <OptionsGroup title={t('Type')} onClick={onClickOption} data={options[0]} />
-          )}
+  render() {
+    const {options, onClickOption} = this.props;
+    const {hasTypeOption, hasLevelOption, checkedQuantity} = this.state;
 
-          {hasLevelOption && (
-            <OptionsGroup title={t('Level')} onClick={onClickOption} data={options[1]} />
+    if (!hasTypeOption && !hasLevelOption) {
+      return null;
+    }
+
+    return (
+      <Wrapper>
+        <DropdownControl
+          menuWidth="240px"
+          blendWithActor
+          button={({isOpen, getActorProps}) => (
+            <DropDownButton
+              isOpen={isOpen}
+              getActorProps={getActorProps}
+              checkedQuantity={checkedQuantity}
+            />
           )}
-        </React.Fragment>
-      </DropdownControl>
-    </Wrapper>
-  );
-};
+        >
+          <React.Fragment>
+            <Header
+              onCheckAll={this.handleToggleCheckAll}
+              checkedQuantity={checkedQuantity}
+              isAllChecked={false}
+            />
+            {hasTypeOption && (
+              <OptionsGroup title={t('Type')} onClick={onClickOption} data={options[0]} />
+            )}
+
+            {hasLevelOption && (
+              <OptionsGroup
+                title={t('Level')}
+                onClick={onClickOption}
+                data={options[1]}
+              />
+            )}
+          </React.Fragment>
+        </DropdownControl>
+      </Wrapper>
+    );
+  }
+}
 
 export {Filter};
 
