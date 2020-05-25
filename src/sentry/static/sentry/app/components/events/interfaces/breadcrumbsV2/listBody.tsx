@@ -25,31 +25,31 @@ type Props = {
 };
 
 type State = {
-  breadCrumbListHeight?: React.CSSProperties['maxHeight'];
+  containerMaxHeight?: React.CSSProperties['maxHeight'];
 };
 
 class ListBody extends React.Component<Props, State> {
   state: State = {};
 
   componentDidMount() {
-    this.loadBreadCrumbListHeight();
+    this.loadContainerMaxHeight();
   }
 
-  listRef = React.createRef<HTMLDivElement>();
+  containerRef = React.createRef<HTMLDivElement>();
 
-  loadBreadCrumbListHeight = () => {
-    const offsetHeight = this.listRef?.current?.offsetHeight;
+  loadContainerMaxHeight = () => {
+    const offsetHeight = this.containerRef?.current?.offsetHeight;
     this.setState({
-      breadCrumbListHeight: offsetHeight ? `${offsetHeight}px` : 'none',
+      containerMaxHeight: offsetHeight ? `${offsetHeight}px` : 'none',
     });
   };
 
   render() {
     const {collapsedQuantity, onToggleCollapse, breadcrumbs, event, orgId} = this.props;
-    const {breadCrumbListHeight} = this.state;
+    const {containerMaxHeight} = this.state;
 
     return (
-      <Grid maxHeight={breadCrumbListHeight} ref={this.listRef}>
+      <Grid maxHeight={containerMaxHeight} ref={this.containerRef}>
         {collapsedQuantity > 0 && (
           <CollapsedInfo onClick={onToggleCollapse} quantity={collapsedQuantity} />
         )}
