@@ -23,7 +23,6 @@ import {
 import {Filter} from './filter/filter';
 import convertBreadcrumbType from './convertBreadcrumbType';
 import getBreadcrumbTypeDetails from './getBreadcrumbTypeDetails';
-// import {FilterGroupType} from './filter/types';
 import BreadcrumbsListHeader from './breadcrumbsListHeader';
 import BreadcrumbsListBody from './breadcrumbsListBody';
 import BreadcrumbIcon from './breadcrumbIcon';
@@ -33,6 +32,7 @@ const MAX_CRUMBS_WHEN_COLLAPSED = 10;
 
 type BreadcrumbWithDetails = Breadcrumb & BreadcrumbDetails & {id: number};
 type FilterOptions = React.ComponentProps<typeof Filter>['options'];
+type FilterOnClickOption = React.ComponentProps<typeof Filter>['onClickOption'];
 
 type State = {
   isCollapsed: boolean;
@@ -264,7 +264,9 @@ class BreadcrumbsContainer extends React.Component<Props, State> {
     });
   };
 
-  handleResetFilter = () => {};
+  handleResetFilter = () => {
+    this.handleClickFilterCheckAll(true);
+  };
 
   handleClickFilterCheckAll = (checkAll: boolean) => {
     const {filterOptions} = this.state;
@@ -290,8 +292,55 @@ class BreadcrumbsContainer extends React.Component<Props, State> {
     );
   };
 
-  handleClickFilterOption = () => {
-    const {filterOptions} = this.state;
+  handleClickFilterOption = (...args: Parameters<FilterOnClickOption>) => {
+    const [type, option] = args;
+
+    if (type === 'type') {
+      this.setState(
+        prevState => ({
+          filterOptions: [
+            [
+              ...prevState.filterOptions[0].map(filterOption => {
+                if (filterOption.type === option.type) {
+                  return {
+                    ...filterOption,
+                    isChecked: !filterOption.isChecked,
+                  };
+                }
+                return filterOption;
+              }),
+            ],
+            [...prevState.filterOptions[1]],
+          ],
+        }),
+        () => {
+          this.handleFilterBySearchTerm(this.state.searchTerm);
+        }
+      );
+      return;
+    }
+
+    this.setState(
+      prevState => ({
+        filterOptions: [
+          [...prevState.filterOptions[0]],
+          [
+            ...prevState.filterOptions[1].map(filterOption => {
+              if (filterOption.type === option.type) {
+                return {
+                  ...filterOption,
+                  isChecked: !filterOption.isChecked,
+                };
+              }
+              return filterOption;
+            }),
+          ],
+        ],
+      }),
+      () => {
+        this.handleFilterBySearchTerm(this.state.searchTerm);
+      }
+    );
   };
 
   render() {
@@ -309,11 +358,9 @@ class BreadcrumbsContainer extends React.Component<Props, State> {
       <EventDataSection
         type={type}
         title={
-          <h3>
-            <GuideAnchor target="breadcrumbs" position="bottom">
-              {t('Breadcrumbs')}
-            </GuideAnchor>
-          </h3>
+          <GuideAnchor target="breadcrumbs" position="bottom">
+            <h3>{t('Breadcrumbs')}</h3>
+          </GuideAnchor>
         }
         actions={
           <Search>

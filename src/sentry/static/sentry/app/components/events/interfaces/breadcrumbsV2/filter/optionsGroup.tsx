@@ -1,32 +1,43 @@
 import React from 'react';
 import styled from '@emotion/styled';
 
+import {t} from 'app/locale';
 import space from 'app/styles/space';
 import CheckboxFancy from 'app/components/checkboxFancy/checkboxFancy';
 
 import {Option} from './types';
 
+type Type = 'type' | 'level';
+
 type Props = {
-  title: string;
-  data: Array<Option>;
-  onClick: () => void;
+  options: Array<Option>;
+  type: 'type' | 'level';
+  onClick: (type: Type, option: Option) => void;
 };
 
-const OptionsGroup = ({title, data, onClick}: Props) => {
-  const handleClick = () => (event: React.MouseEvent<HTMLLIElement>) => {
+const OptionsGroup = ({type, options, onClick}: Props) => {
+  const getTitle = () => {
+    return type === 'type' ? t('Type') : t('Level');
+  };
+
+  const handleClick = (option: Option) => (event: React.MouseEvent<HTMLLIElement>) => {
     event.stopPropagation();
-    // onClick(type, groupType);
+    onClick(type, option);
   };
 
   return (
     <div>
-      <Header>{title}</Header>
+      <Header>{getTitle()}</Header>
       <List>
-        {data.map(({type, description, isChecked, symbol}) => (
-          <ListItem key={type} isChecked={isChecked} onClick={handleClick()}>
-            {symbol}
-            <ListItemDescription>{description}</ListItemDescription>
-            <CheckboxFancy isChecked={isChecked} />
+        {options.map(option => (
+          <ListItem
+            key={option.type}
+            isChecked={option.isChecked}
+            onClick={handleClick(option)}
+          >
+            {option.symbol}
+            <ListItemDescription>{option.description}</ListItemDescription>
+            <CheckboxFancy isChecked={option.isChecked} isDisabled={option.isDisabled} />
           </ListItem>
         ))}
       </List>
@@ -40,9 +51,9 @@ const Header = styled('div')`
   display: flex;
   align-items: center;
   margin: 0;
+  font-weight: 400;
   background-color: ${p => p.theme.offWhite};
   color: ${p => p.theme.gray2};
-  font-weight: normal;
   font-size: ${p => p.theme.fontSizeMedium};
   padding: ${space(1)} ${space(2)};
   border-bottom: 1px solid ${p => p.theme.borderDark};

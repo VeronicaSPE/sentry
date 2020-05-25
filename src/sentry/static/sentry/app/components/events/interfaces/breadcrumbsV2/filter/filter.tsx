@@ -2,7 +2,6 @@ import React from 'react';
 import styled from '@emotion/styled';
 import isEqual from 'lodash/isEqual';
 
-import {t} from 'app/locale';
 import DropdownControl from 'app/components/dropdownControl';
 
 import {DropDownButton} from './dropdownButton';
@@ -12,7 +11,7 @@ import {OptionType, OptionLevel} from './types';
 
 type Props = {
   options: [Array<OptionType>, Array<OptionLevel>];
-  onClickOption: () => void;
+  onClickOption: React.ComponentProps<typeof OptionsGroup>['onClick'];
   onCheckAll: (checkAll: boolean) => void;
 };
 
@@ -103,15 +102,11 @@ class Filter extends React.Component<Props, State> {
               isAllChecked={false}
             />
             {hasTypeOption && (
-              <OptionsGroup title={t('Type')} onClick={onClickOption} data={options[0]} />
+              <OptionsGroup type="type" onClick={onClickOption} options={options[0]} />
             )}
 
             {hasLevelOption && (
-              <OptionsGroup
-                title={t('Level')}
-                onClick={onClickOption}
-                data={options[1]}
-              />
+              <OptionsGroup type="level" onClick={onClickOption} options={options[1]} />
             )}
           </React.Fragment>
         </DropdownControl>
