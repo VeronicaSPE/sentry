@@ -96,13 +96,46 @@ class Filter extends React.Component<Props, State> {
       if (!checkedTypes.some(type => type.levels.includes(level.type))) {
         return {
           ...level,
-          isChecked: false,
           isDisabled: true,
         };
       }
       return {
         ...level,
-        isChecked: true,
+        isDisabled: false,
+      };
+    });
+
+    return [types, levels];
+  };
+
+  filterByLevel = (options: Options, option: Option): Options => {
+    // Filter leves
+    const levels = options[1].map(type => {
+      if (isEqual(type, option)) {
+        return {
+          ...type,
+          isChecked: !type.isChecked,
+        };
+      }
+      return type;
+    });
+
+    const checkedLevels = levels.filter(l => l.isChecked);
+
+    // Filter types
+    const types = options[0].map(type => {
+      if (
+        !type.levels.some(level =>
+          checkedLevels.some(checkedLevel => checkedLevel.type === level)
+        )
+      ) {
+        return {
+          ...type,
+          isDisabled: true,
+        };
+      }
+      return {
+        ...type,
         isDisabled: false,
       };
     });
@@ -114,12 +147,13 @@ class Filter extends React.Component<Props, State> {
     const [type, option] = args;
     const {onFilter, options} = this.props;
 
-    if (type === 'type') {
-      const updatedOptions = this.filterByType(options, option);
-      onFilter(updatedOptions);
-    }
+    const updatedOptions =
+      type === 'type'
+        ? this.filterByType(options, option)
+        : this.filterByLevel(options, option);
 
-    return;
+    console.log('updatedOptions', updatedOptions);
+    onFilter(updatedOptions);
   };
 
   render() {

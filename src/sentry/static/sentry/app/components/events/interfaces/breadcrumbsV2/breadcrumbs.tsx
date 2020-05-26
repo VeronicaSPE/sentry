@@ -296,6 +296,7 @@ class BreadcrumbsContainer extends React.Component<Props, State> {
         newFilterOptions[index][option] = {
           ...filterOptions[index][option],
           isChecked: checkAll,
+          isDisabled: false,
         };
       }
     }
@@ -314,8 +315,20 @@ class BreadcrumbsContainer extends React.Component<Props, State> {
   handleFilter = (filterOptions: FilterOptions) => {
     const {breadcrumbs} = this.state;
 
-    const filterByTypes = breadcrumbs.filter(b => {
+    const filteredByTypes = breadcrumbs.filter(b => {
       const foundInFilterOption = filterOptions[0].find(f => f.type === b.type);
+      if (foundInFilterOption) {
+        return foundInFilterOption.isChecked;
+      }
+      return true;
+    });
+
+    const filteredByLevels = filteredByTypes.filter(t => {
+      if (!t?.level) {
+        return true;
+      }
+
+      const foundInFilterOption = filterOptions[1].find(f => f.type === t.level);
       if (foundInFilterOption) {
         return foundInFilterOption.isChecked;
       }
@@ -325,7 +338,7 @@ class BreadcrumbsContainer extends React.Component<Props, State> {
     this.setState(
       {
         filterOptions,
-        filteredByFilter: filterByTypes,
+        filteredByFilter: filteredByLevels,
       },
       () => {
         this.handleFilterBySearchTerm(this.state.searchTerm);

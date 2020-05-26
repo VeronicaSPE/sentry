@@ -28,6 +28,11 @@ const OptionsGroup = ({type, options, onClick}: Props) => {
 
   const handleClick = (option: Option) => (event: React.MouseEvent<HTMLLIElement>) => {
     event.stopPropagation();
+
+    if (option.isDisabled) {
+      return;
+    }
+
     onClick(type, option);
   };
 
