@@ -41,6 +41,7 @@ type State = {
   filteredByCustomSearch: Array<BreadcrumbWithDetails>;
   filteredBreadcrumbs: Array<BreadcrumbWithDetails>;
   filterOptions: FilterOptions;
+  listBodyHeight?: React.CSSProperties['maxHeight'];
 };
 
 type Props = {
@@ -78,6 +79,21 @@ class BreadcrumbsContainer extends React.Component<Props, State> {
   componentDidMount() {
     this.loadBreadcrumbs();
   }
+
+  componentDidUpdate() {
+    this.loadListBodyHeight();
+  }
+
+  listBodyRef = React.createRef<HTMLDivElement>();
+
+  loadListBodyHeight = () => {
+    if (!this.state.listBodyHeight) {
+      const offsetHeight = this.listBodyRef?.current?.offsetHeight;
+      this.setState({
+        listBodyHeight: offsetHeight ? `${offsetHeight}px` : 'none',
+      });
+    }
+  };
 
   loadBreadcrumbs = () => {
     const {data} = this.props;
@@ -319,7 +335,7 @@ class BreadcrumbsContainer extends React.Component<Props, State> {
 
   render() {
     const {type, event, orgId} = this.props;
-    const {filterOptions, searchTerm} = this.state;
+    const {filterOptions, searchTerm, listBodyHeight} = this.state;
 
     const {
       collapsedQuantity,
@@ -361,6 +377,8 @@ class BreadcrumbsContainer extends React.Component<Props, State> {
                 onToggleCollapse={this.handleToggleCollapse}
                 collapsedQuantity={collapsedQuantity}
                 breadcrumbs={filteredCollapsedBreadcrumbs}
+                maxHeight={listBodyHeight}
+                ref={this.listBodyRef}
               />
             </React.Fragment>
           ) : (
@@ -383,11 +401,13 @@ class BreadcrumbsContainer extends React.Component<Props, State> {
 
 export default BreadcrumbsContainer;
 
-const Content = styled('div')`
+const Content = styled('div')<{maxHeight?: React.CSSProperties['maxHeight']}>`
   border: 1px solid ${p => p.theme.borderDark};
   border-radius: ${p => p.theme.borderRadius};
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   margin-bottom: ${space(3)};
+  ${p => p.maxHeight && `max-height: ${p.maxHeight}`};
+  height: 100%;
 `;
 
 const Search = styled('div')`
