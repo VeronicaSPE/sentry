@@ -1,9 +1,11 @@
 import React from 'react';
 import styled from '@emotion/styled';
+import PropTypes from 'prop-types';
 
 import {Event} from 'app/types';
 import Tooltip from 'app/components/tooltip';
 import space from 'app/styles/space';
+import SentryTypes from 'app/sentryTypes';
 
 import {Time} from './time';
 import {CollapsedInfo} from './collapsedInfo';
@@ -65,6 +67,15 @@ const ListBody = React.forwardRef<HTMLDivElement, Props>(
 );
 
 export {ListBody};
+
+ListBody.propTypes = {
+  breadcrumbs: PropTypes.array.isRequired,
+  collapsedQuantity: PropTypes.number.isRequired,
+  onToggleCollapse: PropTypes.func.isRequired,
+  event: SentryTypes.Event.isRequired,
+  orgId: PropTypes.string.isRequired,
+  maxHeight: PropTypes.string,
+};
 
 const GridCellCategory = styled(GridCell)`
   @media (min-width: ${p => p.theme.breakpoints[0]}) {
